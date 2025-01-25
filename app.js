@@ -3,15 +3,19 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const sequelize = require("./util/database");
-const User = require("./models/user");
-const Chore = require("./models/chore");
-const Tag = require("./models/tag");
+// const sequelize = require("./util/database");
+// const User = require("./models/user");
+// const Chore = require("./models/chore");
+// const Tag = require("./models/tag");
+
+require("dotenv").config();
+
+const supabase = require("./db/supabaseClient");
 
 const app = express();
 
 const authRoutes = require("./routes/auth");
-const choreRoutes = require("./routes/chores");
+// const choreRoutes = require("./routes/chores");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -32,41 +36,44 @@ app.use((req, res, next) => {
   next();
 });
 
-// TODO remove eventually as this is just for testing with user in session
-app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((error) => console.log(error));
-});
+// // TODO remove eventually as this is just for testing with user in session
+// app.use((req, res, next) => {
+//   User.findByPk(1)
+//     .then((user) => {
+//       req.user = user;
+//       next();
+//     })
+//     .catch((error) => console.log(error));
+// });
 
 app.use("/auth", authRoutes);
-app.use("/chores", choreRoutes);
+// app.use("/chores", choreRoutes);
 
-User.hasMany(Chore);
-Chore.belongsTo(User);
-Chore.hasMany(Tag);
+app.listen(3000);
+console.log("STARTED SUCCESSFULLY");
 
-sequelize
-  // .sync({ force: true })
-  .sync()
-  .then((result) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({
-        username: "zleaman",
-        email: "zleaman3@gmail.com",
-        password: "",
-      });
-    }
-    return user;
-  })
-  .then(() => {
-    app.listen(3000);
-    console.log("STARTED SUCCESSFULLY");
-  })
-  .catch((error) => console.log(error));
+// User.hasMany(Chore);
+// Chore.belongsTo(User);
+// Chore.hasMany(Tag);
+
+// sequelize
+//   // .sync({ force: true })
+//   .sync()
+//   .then((result) => {
+//     return User.findByPk(1);
+//   })
+//   .then((user) => {
+//     if (!user) {
+//       return User.create({
+//         username: "zleaman",
+//         email: "zleaman3@gmail.com",
+//         password: "password",
+//       });
+//     }
+//     return user;
+//   })
+//   .then(() => {
+//     app.listen(3000);
+//     console.log("STARTED SUCCESSFULLY");
+//   })
+//   .catch((error) => console.log(error));
