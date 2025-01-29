@@ -81,7 +81,7 @@ exports.postForgotPassword = async (req, res) => {
 
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:5173/update-password",
+      redirectTo: `http://localhost:5173/update-password/${email}`,
     });
 
     if (error) {
@@ -114,24 +114,6 @@ exports.postUpdatePassword = async (req, res) => {
   try {
     // const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
-    // const { data, error } = await supabase.auth.verifyOtp({
-    //   token_hash: token,
-    //   type: "email",
-    // });
-
-    // const {
-    //   data: { user },
-    //   error,
-    // } = await supabase.auth.setSession({
-    //   access_token: accessToken,
-    //   refresh_token: refreshToken,
-    // });
-
-    // const {
-    //   data: { user: updatedUser },
-    //   error: updateError,
-    // } = await supabase.auth.updateUser({ password });
-
     const {
       data: { user },
       error,
@@ -151,15 +133,6 @@ exports.postUpdatePassword = async (req, res) => {
         .json({ error: error ? error.message : updateError.message });
     }
 
-    // console.log("OTP Verify", data);
-
-    // const { error: updateError } = await supabase.auth.updateUser({ password });
-
-    // if (updateError) {
-    //   console.log("Forgot password error:", error);
-    //   return res.status(400).json({ error: error.message });
-    // }
-
     console.log("Password updated successfully", updatedUser);
     return res
       .status(200)
@@ -169,7 +142,3 @@ exports.postUpdatePassword = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-// https://ttktvycwmgivocpoavoh.supabase.co/auth/v1/verify?token=9e90f6e3dc8b41b0b1c4f127edd49eee3ee4cd89565bba4d08473914&type=recovery&redirect_to=http://localhost:5173/update-password
-// https://ttktvycwmgivocpoavoh.supabase.co/auth/v1/verify?token=f034b2803043459de6319908b71889a2334077dabcb166306f9ea82a&type=recovery&redirect_to=http://localhost:5173/update-password
-// https://ttktvycwmgivocpoavoh.supabase.co/auth/v1/verify?token=67c8e4eee19469fff76caba4abc1fb2cd933f5abdaf6a64a7b5324c0&type=recovery&redirect_to=http://localhost:5173/update-password

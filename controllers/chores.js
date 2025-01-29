@@ -1,87 +1,181 @@
+const supabase = require("../db/supabaseClient");
+const { v4: uuidv4 } = require("uuid");
 const Chore = require("../models/chore");
 const Tag = require("../models/tag");
 
-exports.getChores = (req, res, next) => {
-  console.log("GET CHORES");
+exports.getPublicChores = async (req, res, next) => {
+  console.log("GET PUBLIC CHORES");
 
-  // make sure someone is auth/session before returning app chores
-  if (req.user) {
-    Chore.findAll()
-      .then((chores) => {
-        return res.status(200).json({
-          data: [...chores],
-        });
-      })
-      .catch((e) => console.log(e));
-  } else {
-    return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const { data, error } = await supabase
+      .from("chore")
+      .select(
+        "id, name, description, completed_on, frequency_days, public, username"
+      )
+      .eq("public", "true");
+    // TODO limit and order as params sent and return back
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return res.status(200).json({
+      data,
+      error: null,
+    });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
   }
 };
 
 exports.getUserChores = async (req, res, next) => {
-  console.log(`GET USER CHORES`, req.params, req.user.id);
+  console.log("GET USER CHORES");
 
-  if (req.user && req.user.id === +req.params.userId) {
-    const chores = await req.user.getChores();
+  try {
+    const { data, error } = await supabase
+      .from("chore")
+      .select(
+        "id, name, description, completed_on, frequency_days, public, username, user_id"
+      )
+      .eq("user_id", req.user.id);
+    // TODO limit and order as params sent and return back
+    if (error) {
+      throw new Error(error.message);
+    }
 
-    const choresMap = await Promise.all(
-      chores.map(async (chore) => {
-        const tags = await Tag.findAll({ where: { choreId: chore.id } });
-        return {
-          ...chore.dataValues,
-          tags: [...tags.map((tag) => tag.dataValues.id)],
-        };
-      })
-    );
-
-    console.log(choresMap);
     return res.status(200).json({
-      data: [...choresMap],
+      data,
+      error: null,
     });
-  } else {
-    return res.status(401).json({ error: "Unauthorized" });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
   }
 };
 
-exports.postChore = (req, res, next) => {
+exports.postChore = async (req, res, next) => {
   console.log("POST CHORE", req.body);
 
-  const name = req.body.name;
-  const frequencyDays = req.body.frequencyDays;
-  const completedOn = req.body.completedOn;
-  const description = req.body.description;
-  const tags = req.body.tags;
-  let chore;
+  try {
+    const {
+      name,
+      frequency_days,
+      completed_on,
+      description,
+      public: pub,
+    } = req.body;
+    const { data, error } = await supabase.from("chore").insert({
+      id: uuidv4(),
+      name,
+      frequency_days,
+      completed_on,
+      description,
+      public: pub,
+      user_id: req.user.id,
+      username: req.user.email.split("@")[0],
+    });
 
-  if (req.user) {
-    req.user
-      .createChore({
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return res.status(200).json({
+      data,
+      error: null,
+    });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
+  }
+};
+
+exports.putChore = async (req, res, next) => {
+  console.log("PUT CHORE", req.body);
+
+  try {
+    const choreId = req.params.choreId;
+    const {
+      name,
+      frequency_days,
+      completed_on,
+      description,
+      public: pub,
+    } = req.body;
+
+    const { data, error } = await supabase
+      .from("chore")
+      .update({
         name,
-        frequencyDays,
-        completedOn,
+        frequency_days,
+        completed_on,
         description,
+        public: pub,
       })
-      .then((result) => {
-        chore = result.dataValues;
+      .eq("id", choreId);
 
-        tags.forEach((tag) => {
-          const id = tag.toLowerCase();
+    if (error) {
+      throw new Error(error.message);
+    }
 
-          Tag.create({
-            id,
-            choreId: chore.id,
-          });
-        });
+    return res.status(200).json({
+      data,
+      error: null,
+    });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
+  }
+};
+
+exports.postCompleteChore = async (req, res, next) => {
+  console.log("POST COMPLETE CHORE");
+
+  try {
+    const choreId = req.params.choreId;
+    const { completed_on } = req.body;
+
+    const { data, error } = await supabase
+      .from("chore")
+      .update({
+        completed_on,
       })
-      .then((result) => {
-        console.log(result);
-        return res.status(200).json({
-          data: { ...result },
-          status: "chore posted successfully",
-        });
-      })
-      .catch((e) => console.log(e));
-  } else {
-    return res.status(401).json({ error: "Unauthorized" });
+      .eq("id", choreId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return res.status(200).json({
+      data,
+      error: null,
+    });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
+  }
+};
+
+exports.deleteChore = async (req, res, next) => {
+  console.log("DELETE CHORE");
+
+  try {
+    const choreId = req.params.choreId;
+
+    const { data, error } = await supabase
+      .from("chore")
+      .delete()
+      .eq("id", choreId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return res.status(200).json({
+      data,
+      error: null,
+    });
+  } catch (err) {
+    console.log("ERROR:", err);
+    return res.status(500).json({ data: null, error: "Internal Server Error" });
   }
 };

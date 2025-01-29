@@ -15,7 +15,7 @@ const supabase = require("./db/supabaseClient");
 const app = express();
 
 const authRoutes = require("./routes/auth");
-// const choreRoutes = require("./routes/chores");
+const choreRoutes = require("./routes/chores");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -36,18 +36,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// // TODO remove eventually as this is just for testing with user in session
-// app.use((req, res, next) => {
-//   User.findByPk(1)
-//     .then((user) => {
-//       req.user = user;
-//       next();
-//     })
-//     .catch((error) => console.log(error));
-// });
+app.use(async (req, res, next) => {
+  if (req.headers.authorization) {
+    const token = req.headers.authorization?.split(" ")[1];
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+
+    req.user = user;
+  }
+
+  next();
+});
 
 app.use("/auth", authRoutes);
-// app.use("/chores", choreRoutes);
+app.use("/chores", choreRoutes);
 
 app.listen(3000);
 console.log("STARTED SUCCESSFULLY");
