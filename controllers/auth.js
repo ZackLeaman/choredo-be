@@ -102,7 +102,7 @@ exports.postForgotPassword = async (req, res) => {
 exports.postUpdatePassword = async (req, res) => {
   console.log("POST UPDATE PASSWORD", req.body);
 
-  if (!req.body.password || !req.body.confirm || !req.body.accessToken) {
+  if (!req.body.password || !req.body.confirm || !req.token) {
     return res.status(422).json({ error: "Invalid body parameters" });
   }
   if (req.body.password !== req.body.confirm) {
@@ -117,7 +117,7 @@ exports.postUpdatePassword = async (req, res) => {
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser(accessToken);
+    } = await supabase.auth.getUser(req.token);
 
     const {
       data: { user: updatedUser },
@@ -139,6 +139,24 @@ exports.postUpdatePassword = async (req, res) => {
       .json({ message: "Password updated successfully", updatedUser });
   } catch (err) {
     console.error("Forgot password error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.postSignoutUser = async (req, res) => {
+  console.log("POST SIGNOUT USER");
+
+  try {
+    const { error } = await supabase.auth.admin.signOut(req.token);
+
+    if (error) {
+      console.log("Error signout user:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(200).json({ message: "Signout successful" });
+  } catch (err) {
+    console.error("Signout user error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };

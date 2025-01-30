@@ -12,4 +12,6 @@ router.post("/forgot-password", authController.postForgotPassword);
 
 router.post("/update-password", authController.postUpdatePassword);
 
+router.post("/signout", authController.postSignoutUser);
+
 module.exports = router;

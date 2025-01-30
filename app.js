@@ -16,6 +16,7 @@ const app = express();
 
 const authRoutes = require("./routes/auth");
 const choreRoutes = require("./routes/chores");
+const achievementRoutes = require("./routes/achievement");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -45,6 +46,7 @@ app.use(async (req, res, next) => {
     } = await supabase.auth.getUser(token);
 
     req.user = user;
+    req.token = token;
   }
 
   next();
@@ -52,6 +54,7 @@ app.use(async (req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/chores", choreRoutes);
+app.use("/achievement", achievementRoutes);
 
 app.listen(3000);
 console.log("STARTED SUCCESSFULLY");
