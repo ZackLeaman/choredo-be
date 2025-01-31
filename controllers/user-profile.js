@@ -53,15 +53,19 @@ exports.postUserProfile = async (req, res) => {
     }
     const { data, error } = await supabase
       .from("user_profile")
-      .upsert({
-        user_id: user.id,
-        ...updateProps,
-      })
-      .eq("user_id", user.id)
+      .upsert(
+        {
+          user_id: user.id,
+          ...updateProps,
+        },
+        {
+          onConflict: ["user_id"],
+        }
+      )
       .select();
 
     if (error) {
-      throw new Error(error);
+      throw new Error(error.message);
     }
 
     console.log(data);

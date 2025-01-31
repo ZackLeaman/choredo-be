@@ -1,7 +1,5 @@
 const supabase = require("../db/supabaseClient");
 const { v4: uuidv4 } = require("uuid");
-const Chore = require("../models/chore");
-const Tag = require("../models/tag");
 
 exports.getPublicChores = async (req, res, next) => {
   console.log("GET PUBLIC CHORES");
@@ -15,12 +13,16 @@ exports.getPublicChores = async (req, res, next) => {
       .eq("public", "true");
 
     // TODO limit and order as params sent and return back
+
+    // THE MAGIC CONSOLE LOG TO RULE THEM ALL
+    console.log(data, error);
+
     if (error) {
       throw new Error(error.message);
     }
 
     return res.status(200).json({
-      data,
+      data: [...data],
       error: null,
     });
   } catch (err) {
@@ -108,7 +110,7 @@ exports.putChore = async (req, res, next) => {
 
     const { data, error } = await supabase
       .from("chore")
-      .upsert({
+      .update({
         name,
         frequency_days,
         completed_on,
@@ -149,7 +151,7 @@ exports.postCompleteChore = async (req, res, next) => {
       throw new Error(error.message);
     }
 
-    // TODO update user progress and level up if needed
+    // TODO maybe move level up here instead of frontend?
 
     return res.status(200).json({
       data,
