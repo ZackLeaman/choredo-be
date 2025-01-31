@@ -17,6 +17,7 @@ const app = express();
 const authRoutes = require("./routes/auth");
 const choreRoutes = require("./routes/chores");
 const achievementRoutes = require("./routes/achievement");
+const userProfileRoutes = require("./routes/user-profile");
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -55,6 +56,7 @@ app.use(async (req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/chores", choreRoutes);
 app.use("/achievement", achievementRoutes);
+app.use("/user-profile", userProfileRoutes);
 
 app.listen(3000);
 console.log("STARTED SUCCESSFULLY");

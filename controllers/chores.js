@@ -13,6 +13,7 @@ exports.getPublicChores = async (req, res, next) => {
         "id, name, description, completed_on, frequency_days, public, username"
       )
       .eq("public", "true");
+
     // TODO limit and order as params sent and return back
     if (error) {
       throw new Error(error.message);
@@ -64,16 +65,19 @@ exports.postChore = async (req, res, next) => {
       description,
       public: pub,
     } = req.body;
-    const { data, error } = await supabase.from("chore").insert({
-      id: uuidv4(),
-      name,
-      frequency_days,
-      completed_on,
-      description,
-      public: pub,
-      user_id: req.user.id,
-      username: req.user.email.split("@")[0],
-    });
+    const { data, error } = await supabase
+      .from("chore")
+      .insert({
+        id: uuidv4(),
+        name,
+        frequency_days,
+        completed_on,
+        description,
+        public: pub,
+        user_id: req.user.id,
+        username: req.user.email.split("@")[0],
+      })
+      .select();
 
     if (error) {
       throw new Error(error.message);
@@ -104,7 +108,7 @@ exports.putChore = async (req, res, next) => {
 
     const { data, error } = await supabase
       .from("chore")
-      .update({
+      .upsert({
         name,
         frequency_days,
         completed_on,
@@ -144,6 +148,8 @@ exports.postCompleteChore = async (req, res, next) => {
     if (error) {
       throw new Error(error.message);
     }
+
+    // TODO update user progress and level up if needed
 
     return res.status(200).json({
       data,
