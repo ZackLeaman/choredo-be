@@ -58,7 +58,7 @@ app.use("/chores", choreRoutes);
 app.use("/achievement", achievementRoutes);
 app.use("/user-profile", userProfileRoutes);
 
-app.listen(3000);
+app.listen(process.env.PORT ? process.env.PORT : 3000);
 console.log("STARTED SUCCESSFULLY");
 
 // User.hasMany(Chore);

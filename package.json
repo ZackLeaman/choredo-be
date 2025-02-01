@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "start-server": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Zack Leaman",
   "license": "ISC",
-  "description": "",
+  "description": "Choredo backend rest api",
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",
     "dotenv": "^16.4.7",
