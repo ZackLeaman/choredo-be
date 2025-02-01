@@ -1,0 +1,40 @@
+name: Deploy Express API to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # or whichever branch you want to deploy from
+
+env:
+  NODE_ENV: production
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  POKE_API: ${{ variables.POKE_API }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Deploy to GitHub Pages
+        run: |
+          # Initialize git repo to deploy
+          git config --global user.name "ZackLeaman"
+          git config --global user.email "zleaman3@gmail.com"
+          
+          # Commit and push the changes to the gh-pages branch
+          git add docs/*
+          git commit -m "Deploy Express API to GitHub Pages"
+          git push origin main:gh-pages  # Push to the gh-pages branch for GitHub Pages
