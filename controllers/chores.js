@@ -10,12 +10,9 @@ exports.getPublicChores = async (req, res, next) => {
       .select(
         "id, name, description, completed_on, frequency_days, public, username"
       )
-      .eq("public", "true");
+      .eq("public", true);
 
     // TODO limit and order as params sent and return back
-
-    // THE MAGIC CONSOLE LOG TO RULE THEM ALL
-    console.log(data, error);
 
     if (error) {
       throw new Error(error.message);
